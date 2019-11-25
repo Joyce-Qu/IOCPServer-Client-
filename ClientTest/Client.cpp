@@ -63,7 +63,7 @@ DWORD WINAPI CClient::_WorkerThread(LPVOID lpParam)
 		}
 		memset(pTemp, 0, MAX_BUFFER_LEN);
 		// 向服务器发送信息
-		snprintf(pTemp, MAX_BUFFER_LEN - 1,
+		snprintf(pTemp, MAX_BUFFER_LEN,
 			("Msg:[%d] Thread:[%d], Data:[%s]"),
 			i, pParams->nThreadNo, pParams->szSendBuffer);
 		nBytesSent = send(pParams->sock, pTemp, strlen(pTemp), 0);
@@ -77,14 +77,15 @@ DWORD WINAPI CClient::_WorkerThread(LPVOID lpParam)
 		memset(pTemp, 0, MAX_BUFFER_LEN);
 		memset(pParams->szRecvBuffer, 0, MAX_BUFFER_LEN);
 		nBytesRecv = recv(pParams->sock, pParams->szRecvBuffer,
-			MAX_BUFFER_LEN, 0);
+			MAX_BUFFER_LEN - 1, 0); //这里-1就不会内存越界了
 		if (SOCKET_ERROR == nBytesRecv)
 		{
 			pClient->ShowMessage("recv ERROR: ErrCode=[%ld]\n", WSAGetLastError());
 			break; /// return 1;
 		}
-		pParams->szRecvBuffer[nBytesRecv] = 0;
-		snprintf(pTemp, MAX_BUFFER_LEN - 1,
+		//nBytesRecv = 4096 //这句可能导致内存越界
+		//pParams->szRecvBuffer[nBytesRecv] = 0;
+		snprintf(pTemp, MAX_BUFFER_LEN,
 			("RECV: Msg:[%d] Thread[%d], Data[%s]"),
 			i, pParams->nThreadNo, pParams->szRecvBuffer);
 		pClient->ShowMessage(pTemp);
@@ -127,7 +128,7 @@ bool CClient::EstablishConnections()
 	//m_pWorkerThreadIds = new DWORD[m_nThreads];
 	//memset(m_phWorkerThreads, 0, sizeof(HANDLE) * m_nThreads);
 	m_pWorkerParams = new WorkerThreadParam[m_nThreads];
-	ASSERT(m_pWorkerParams != 0);
+	ASSERT(m_pWorkerParams != 0); //bad_alloc
 	memset(m_pWorkerParams, 0, sizeof(WorkerThreadParam) * m_nThreads);
 
 	// 初始化线程池
@@ -139,7 +140,7 @@ bool CClient::EstablishConnections()
 	cleanupGroup = CreateThreadpoolCleanupGroup();
 	SetThreadpoolCallbackCleanupGroup(&te, cleanupGroup, NULL);
 	pWorks = new PTP_WORK[m_nThreads];
-	ASSERT(pWorks != 0);
+	ASSERT(pWorks != 0); //bad_alloc
 
 	// 根据用户设置的线程数量，生成每一个线程连接至服务器，并生成线程发送数据
 	for (int i = 0; i < m_nThreads; i++)
@@ -156,12 +157,12 @@ bool CClient::EstablishConnections()
 		{
 			ShowMessage(_T("连接服务器失败！"));
 			//CleanUp(); //这里清除后，线程还在用，就崩溃了
-			return false;
+			continue;//return false;
 		}
 		m_pWorkerParams[i].nThreadNo = i + 1;
 		m_pWorkerParams[i].nSendTimes = m_nTimes;
-		sprintf(m_pWorkerParams[i].szSendBuffer, "%s", pData);
-		Sleep(10);
+		snprintf(m_pWorkerParams[i].szSendBuffer,
+			MAX_BUFFER_LEN, "%s", pData);
 		// 如果连接服务器成功，就开始建立工作者线程，向服务器发送指定数据
 		m_pWorkerParams[i].pClient = this;
 		/*m_phWorkerThreads[i] = CreateThread(0, 0, _WorkerThread,
@@ -174,6 +175,7 @@ bool CClient::EstablishConnections()
 		{
 			SubmitThreadpoolWork(pWorks[i]);
 		}
+		Sleep(10);
 	}
 	return true;
 }

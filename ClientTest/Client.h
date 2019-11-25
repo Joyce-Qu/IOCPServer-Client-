@@ -12,7 +12,7 @@ using std::string;
 // 屏蔽deprecation警告
 #pragma warning(disable: 4996)
 // 缓冲区长度(8*1024字节)
-#define MAX_BUFFER_LEN (4*1024)//(8*1024)
+#define MAX_BUFFER_LEN 512//(4*1024)//(8*1024)
 #define DEFAULT_PORT 10240 // 默认端口
 #define DEFAULT_IP _T("127.0.0.1") // 默认IP地址
 #define DEFAULT_THREADS 10000 // 默认并发线程数
