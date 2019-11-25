@@ -10,9 +10,9 @@ Addr::Addr(const SOCKADDR_IN& addr)
 
 std::string Addr::toString() const
 {
-    char peerAddrBuf[1024] = { 0 };
-    inet_ntop(AF_INET, &m_addr.sin_addr, peerAddrBuf, 1024);
-    ostringstream os;
+	ostringstream os;
+    char peerAddrBuf[32] = { 0 }; //255.255.255.255:36660
+    inet_ntop(AF_INET, &m_addr.sin_addr, peerAddrBuf, sizeof(peerAddrBuf));
     os << peerAddrBuf << ":" << ntohs(m_addr.sin_port);
     return os.str();
 }

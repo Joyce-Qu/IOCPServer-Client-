@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "Timer.h"
-#include "IocpServer.h"
-#include "ClientContext.h"
 #include "LockGuard.h"
+#include "SoContext.h"
+#include "IocpServer.h"
 #include <iostream>
 using namespace std;
 
@@ -10,26 +10,23 @@ unsigned HbTimer::checkHeartbeatWorker(LPVOID arg)
 {
     IocpServer* pIocpServer = static_cast<IocpServer*>(arg);
     if (nullptr == pIocpServer)
+	{
         return 0;
-
-    HANDLE hTimer = NULL;
-    LARGE_INTEGER liDueTime;
-
-    liDueTime.QuadPart = -10000000LL * 1;   //1√Î
-
+	}
+	HANDLE hTimer = NULL;
     hTimer = CreateWaitableTimer(NULL, TRUE, NULL);
     if (NULL == hTimer)
     {
         cout << "CreateWaitableTimer failed" << endl;
         return 1;
     }
-
+	LARGE_INTEGER liDueTime;
+	liDueTime.QuadPart = -10000000LL * 1;   //1√Î
     if (!SetWaitableTimer(hTimer, &liDueTime, 0, NULL, NULL, 0))
     {
         cout << "SetWaitableTimer failed" << endl;
         return 2;
     }
-
     while (1)
     {
         if (WaitForSingleObject(hTimer, INFINITE) != WAIT_OBJECT_0)
@@ -38,12 +35,10 @@ unsigned HbTimer::checkHeartbeatWorker(LPVOID arg)
             return 1;
         }
 
+		DWORD timeout = 10 * 1000;
         DWORD curTime = GetTickCount();
-        DWORD timeout = 10 * 1000;
-
         std::list<ClientContext*>* pConnectedClientList
 			= &pIocpServer->m_connectedClientList;
-
         LockGuard lk(&pIocpServer->m_csClientList);
         {
             for (auto it = pConnectedClientList->begin();
@@ -70,13 +65,11 @@ unsigned HbTimer::checkHeartbeatWorker(LPVOID arg)
                 }
             }
         }
-
         if (!SetWaitableTimer(hTimer, &liDueTime, 0, NULL, NULL, 0))
         {
             cout << "SetWaitableTimer failed" << endl;
             return 2;
         }
-
     }
     return 0;
 }

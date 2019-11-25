@@ -3,10 +3,10 @@
 #include "Global.h"
 #include "Buffer.h"
 #include "Addr.h"
-#include <string>
-#include <map>
 #include <algorithm>
+#include <string>
 #include <queue>
+#include <map>
 
 struct ListenContext
 {
@@ -24,7 +24,6 @@ struct ClientContext
 	ClientContext(const SOCKET& socket = INVALID_SOCKET);
 	//socket”…IocpServer Õ∑≈
 	~ClientContext();
-
 	void reset();
 
 	void appendToBuffer(PBYTE pInBuf, size_t len);

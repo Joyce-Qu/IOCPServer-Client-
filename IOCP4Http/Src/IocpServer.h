@@ -47,8 +47,10 @@ protected:
 	PostResult postSend(ClientContext* pConnClient);
 
 	bool handleAccept(LPOVERLAPPED lpOverlapped, DWORD dwBytesTransferred);
-	bool handleRecv(ULONG_PTR lpCompletionKey, LPOVERLAPPED lpOverlapped, DWORD dwBytesTransferred);
-	bool handleSend(ULONG_PTR lpCompletionKey, LPOVERLAPPED lpOverlapped, DWORD dwBytesTransferred);
+	bool handleRecv(ULONG_PTR lpCompletionKey, LPOVERLAPPED lpOverlapped,
+		DWORD dwBytesTransferred);
+	bool handleSend(ULONG_PTR lpCompletionKey, LPOVERLAPPED lpOverlapped,
+		DWORD dwBytesTransferred);
 	bool handleClose(ULONG_PTR lpCompletionKey);
 
 	// Used to avoid access violation.
@@ -81,7 +83,8 @@ private:
 	short m_listenPort;
 	HANDLE m_hComPort; //完成端口
 	HANDLE m_hExitEvent; //退出线程事件
-	HANDLE m_hWriteCompletedEvent; //postSend对应的写操作已完成，可以进行下一个投递
+	//postSend对应的写操作已完成，可以进行下一个投递
+	HANDLE m_hWriteCompletedEvent; 
 
 	void* m_lpfnAcceptEx; //acceptEx函数指针
 	void* m_lpfnGetAcceptExAddr; //GetAcceptExSockaddrs函数指针

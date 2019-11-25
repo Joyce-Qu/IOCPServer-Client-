@@ -4,7 +4,7 @@
 #define IOCP_BUFFER_ALIGN_MEMORY(a, b) (a + (b - ((a % b) ? (a % b) : b)))
 
 //设置成4K的倍数
-constexpr int IO_BUF_SIZE = 8192;
+constexpr int IO_BUF_SIZE = (1024 * 8);
 
 constexpr int ACCEPT_ADDRS_SIZE = sizeof(SOCKADDR_IN) + 16;
 constexpr int DOUBLE_ACCEPT_ADDRS_SIZE = (sizeof(SOCKADDR_IN) + 16) * 2;

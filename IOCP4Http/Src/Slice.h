@@ -61,9 +61,7 @@ private:
 };
 
 bool operator<(const Slice& x, const Slice& y);
-
 bool operator==(const Slice& x, const Slice& y);
-
 bool operator!=(const Slice& x, const Slice& y);
 
 #endif // !__SLICE_H__

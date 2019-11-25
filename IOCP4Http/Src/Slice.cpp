@@ -1,8 +1,7 @@
 #include "pch.h"
 #include "Slice.h"
 
-Slice::Slice()
-    : m_pb("")
+Slice::Slice() : m_pb("")
 {
     m_pe = m_pb;
 }
@@ -59,7 +58,6 @@ void Slice::resize(size_t sz)
     m_pe = m_pb + sz;
 }
 
-
 void Slice::clear()
 {
     m_pe = m_pb = "";
@@ -96,8 +94,9 @@ Slice Slice::eatLine()
 Slice Slice::eat(size_t sz)
 {
     if (sz > size())
+	{
         sz = size();
-
+	}
     Slice s(m_pb, sz);
     m_pb += sz;
     return s;
@@ -114,11 +113,13 @@ Slice Slice::sub(int boff, int eoff) const
 Slice & Slice::trimSpace()
 {
     while (m_pb < m_pe && isspace(*m_pb))
+	{
         m_pb++;
-
+	}
     while (m_pb < m_pe && isspace(m_pe[-1]))
+	{
         m_pe--;
-
+	}
     return *this;
 }
 
@@ -152,12 +153,14 @@ int Slice::compare(const Slice& b) const
 
 bool Slice::starts_with(const Slice& x) const
 {
-    return (size() >= x.size() && memcmp(m_pb, x.m_pb, x.size()) == 0);
+    return (size() >= x.size() 
+		&& memcmp(m_pb, x.m_pb, x.size()) == 0);
 }
 
 bool Slice::end_with(const Slice& x) const
 {
-    return (size() >= x.size() && memcmp(m_pe - x.size(), x.m_pb, x.size()) == 0);
+    return (size() >= x.size() && memcmp(m_pe - x.size(),
+		x.m_pb, x.size()) == 0);
 }
 
 std::vector<Slice> Slice::split(char ch) const
@@ -173,8 +176,9 @@ std::vector<Slice> Slice::split(char ch) const
         }
     }
     if (m_pe != m_pb)
+	{
         r.push_back(Slice(pb, m_pe));
-
+	}
     return r;
 }
 
@@ -185,7 +189,8 @@ bool operator<(const Slice& x, const Slice& y)
 
 bool operator==(const Slice& x, const Slice& y)
 {
-    return ((x.size() == y.size()) && (memcmp(x.data(), y.data(), x.size()) == 0));
+    return ((x.size() == y.size()) && (memcmp(x.data(), 
+		y.data(), x.size()) == 0));
 }
 
 bool operator!=(const Slice& x, const Slice& y)

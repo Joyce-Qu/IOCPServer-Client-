@@ -8,9 +8,7 @@ class Buffer
 public:
 	Buffer();
 	virtual ~Buffer();
-
 	operator Slice();
-
 	void clear();
 	//相当于consume，跟consume不同，remove每次都要更换内存
 	UINT remove(UINT nSize);
@@ -18,21 +16,18 @@ public:
 	BOOL write(PBYTE pData, UINT nSize);
 	BOOL write(PCHAR pData, UINT nSize);
 	BOOL write(const std::string& s);
-	int scan(PBYTE pScan, UINT nPos);
 	BOOL insert(PBYTE pData, UINT nSize);
 	BOOL insert(const std::string& s);
+	int scan(PBYTE pScan, UINT nPos);
 	void copy(Buffer& buf);
 	PBYTE getBuffer(UINT nPos = 0);
-	void writeFile(const std::string& fileName);
-
-	//数据大小
-	UINT getBufferLen();
+	UINT getBufferLen(); //数据大小
+	void writeFile(const std::string& fileName);	
 
 protected:
-	UINT reallocateBuffer(UINT nSize);
-	UINT deallocateBuffer(UINT nSize);
-	//占用内存大小
-	UINT getMemSize();
+	UINT reallocateBuffer(UINT nSize); //重新分配
+	UINT deallocateBuffer(UINT nSize); //貌似没用	
+	UINT getMemSize(); //占用内存大小
 
 protected:
 	PBYTE m_pBegin; //缓冲区头部位置，固定不移动

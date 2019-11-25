@@ -1,11 +1,11 @@
 #include "pch.h"
-#include "ClientContext.h"
-#include "IoContext.h"
-#include "Net.h"
 #include <assert.h>
-#include "Codec.h"
+#include "Net.h"
 #include "Buffer.h"
 #include "LockGuard.h"
+#include "IoContext.h"
+#include "SoContext.h"
+#include "HttpCodec.h"
 
 #include <iostream>
 using namespace std;
@@ -18,13 +18,12 @@ ListenContext::ListenContext(short port, const std::string& ip)
     //m_addr.sin_addr.s_addr = inet_addr(ip.c_str());
     m_addr.sin_port = htons(port);
 
-    m_socket = Net::WSASocket_();
+    m_socket = Net::socket();
     assert(SOCKET_ERROR != m_socket);
 }
 
 ClientContext::ClientContext(const SOCKET& socket) :
-    m_socket(socket)
-    , m_recvIoCtx(new RecvIoContext())
+    m_socket(socket), m_recvIoCtx(new RecvIoContext())
     , m_sendIoCtx(new IoContext(PostType::SEND_EVENT))
     , m_nPendingIoCnt(0)
 {

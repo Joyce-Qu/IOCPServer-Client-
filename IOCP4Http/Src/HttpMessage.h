@@ -5,11 +5,11 @@
 
 struct HttpMessage
 {
-	std::string getHeaderField(const std::string& strKey);
-	void setHeader(std::string key, std::string value);
 	std::string m_version;
 	//std::string m_body;
 	std::unordered_map<std::string, std::string> m_headers;
+	std::string getHeaderField(const std::string& strKey);
+	void setHeader(std::string key, std::string value);
 };
 
 struct HttpRequest : public HttpMessage

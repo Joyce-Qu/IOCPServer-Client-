@@ -12,5 +12,7 @@ void HttpMessage::setHeader(std::string key, std::string value)
 {
     unordered_map<string, string>::iterator it = m_headers.find(key);
     if (it != m_headers.end())
+	{
         m_headers[key] = value;
+	}
 }
