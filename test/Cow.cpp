@@ -25,8 +25,8 @@ Cow::Cow(const Cow& c)
 {
 	//delete[] hobby;
 	strcpy(name, c.name);
-	//hobby = new char[strlen(c.hobby) + 1];
-	hobby = new char[strlen(c.hobby)];
+	//hobby = new char[strlen(c.hobby)];
+	hobby = new char[strlen(c.hobby) + 1];
 	strcpy(hobby, c.hobby);
 	weight = c.weight;
 

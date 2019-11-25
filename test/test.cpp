@@ -40,6 +40,6 @@ int main()
 	cow3.showCow();
 	cow1 = cow2;
 	cow1.showCow();
-	//system("pause");
+	system("pause");
 	return 0;
 }
