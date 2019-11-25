@@ -18,6 +18,40 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Src\Addr.h" />
+    <ClInclude Include="Src\Buffer.h" />
+    <ClInclude Include="Src\Buffer_old.h" />
+    <ClInclude Include="Src\ClientContext.h" />
+    <ClInclude Include="Src\Codec.h" />
+    <ClInclude Include="Src\Global.h" />
+    <ClInclude Include="Src\HttpCodec.h" />
+    <ClInclude Include="Src\HttpMessage.h" />
+    <ClInclude Include="Src\HttpServer.h" />
+    <ClInclude Include="Src\IoContext.h" />
+    <ClInclude Include="Src\IocpServer.h" />
+    <ClInclude Include="Src\LockGuard.h" />
+    <ClInclude Include="Src\Mempool.h" />
+    <ClInclude Include="Src\Net.h" />
+    <ClInclude Include="Src\Slice.h" />
+    <ClInclude Include="Src\Timer.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Src\Addr.cpp" />
+    <ClCompile Include="Src\Buffer.cpp" />
+    <ClCompile Include="Src\Buffer_old.cpp" />
+    <ClCompile Include="Src\ClientContext.cpp" />
+    <ClCompile Include="Src\Codec.cpp" />
+    <ClCompile Include="Src\HttpCodec.cpp" />
+    <ClCompile Include="Src\HttpMessage.cpp" />
+    <ClCompile Include="Src\HttpServer.cpp" />
+    <ClCompile Include="Src\IoContext.cpp" />
+    <ClCompile Include="Src\IocpServer.cpp" />
+    <ClCompile Include="Src\main.cpp" />
+    <ClCompile Include="Src\Net.cpp" />
+    <ClCompile Include="Src\Slice.cpp" />
+    <ClCompile Include="Src\Timer.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{07851CDF-111D-4839-9776-AAEF000421C0}</ProjectGuid>
@@ -84,13 +118,14 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_SCL_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -100,13 +135,14 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -115,7 +151,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -123,7 +159,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -134,7 +171,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -142,7 +179,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>
+      </PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -151,45 +189,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="Addr.h" />
-    <ClInclude Include="Buffer.h" />
-    <ClInclude Include="ClientContext.h" />
-    <ClInclude Include="Codec.h" />
-    <ClInclude Include="Global.h" />
-    <ClInclude Include="HttpCodec.h" />
-    <ClInclude Include="HttpMessage.h" />
-    <ClInclude Include="HttpServer.h" />
-    <ClInclude Include="IoContext.h" />
-    <ClInclude Include="IocpServer.h" />
-    <ClInclude Include="LockGuard.h" />
-    <ClInclude Include="Mempool.h" />
-    <ClInclude Include="Net.h" />
-    <ClInclude Include="pch.h" />
-    <ClInclude Include="Slice.h" />
-    <ClInclude Include="Timer.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Addr.cpp" />
-    <ClCompile Include="Buffer.cpp" />
-    <ClCompile Include="ClientContext.cpp" />
-    <ClCompile Include="Codec.cpp" />
-    <ClCompile Include="HttpCodec.cpp" />
-    <ClCompile Include="HttpMessage.cpp" />
-    <ClCompile Include="HttpServer.cpp" />
-    <ClCompile Include="IoContext.cpp" />
-    <ClCompile Include="IocpServer.cpp" />
-    <ClCompile Include="Net.cpp" />
-    <ClCompile Include="pch.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="Slice.cpp" />
-    <ClCompile Include="Timer.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
