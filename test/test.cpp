@@ -7,7 +7,7 @@ void noMemoryToAlloc()
 	abort();
 }
 
-int main()
+int main1()
 {
 	try 
 	{ 
@@ -23,6 +23,23 @@ int main()
 	catch (const bad_alloc & e) 
 	{ 
 		//否则，会调用到这里
+		cerr << e.what();
 		return -1;
 	}
+	return 0;
+}
+
+#include "Cow.h"
+int main()
+{
+	Cow cow1;
+	cow1.showCow();
+	Cow cow2("yellow", "grass", 120);
+	cow2.showCow();
+	Cow cow3(cow2);
+	cow3.showCow();
+	cow1 = cow2;
+	cow1.showCow();
+	//system("pause");
+	return 0;
 }
