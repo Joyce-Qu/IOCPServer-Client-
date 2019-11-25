@@ -21,9 +21,7 @@
   <ItemGroup>
     <ClInclude Include="Src\Addr.h" />
     <ClInclude Include="Src\Buffer.h" />
-    <ClInclude Include="Src\Buffer_old.h" />
-    <ClInclude Include="Src\ClientContext.h" />
-    <ClInclude Include="Src\Codec.h" />
+    <ClInclude Include="Src\SoContext.h" />
     <ClInclude Include="Src\Global.h" />
     <ClInclude Include="Src\HttpCodec.h" />
     <ClInclude Include="Src\HttpMessage.h" />
@@ -31,7 +29,6 @@
     <ClInclude Include="Src\IoContext.h" />
     <ClInclude Include="Src\IocpServer.h" />
     <ClInclude Include="Src\LockGuard.h" />
-    <ClInclude Include="Src\Mempool.h" />
     <ClInclude Include="Src\Net.h" />
     <ClInclude Include="Src\Slice.h" />
     <ClInclude Include="Src\Timer.h" />
@@ -39,9 +36,7 @@
   <ItemGroup>
     <ClCompile Include="Src\Addr.cpp" />
     <ClCompile Include="Src\Buffer.cpp" />
-    <ClCompile Include="Src\Buffer_old.cpp" />
-    <ClCompile Include="Src\ClientContext.cpp" />
-    <ClCompile Include="Src\Codec.cpp" />
+    <ClCompile Include="Src\SoContext.cpp" />
     <ClCompile Include="Src\HttpCodec.cpp" />
     <ClCompile Include="Src\HttpMessage.cpp" />
     <ClCompile Include="Src\HttpServer.cpp" />

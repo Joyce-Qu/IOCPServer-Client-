@@ -15,19 +15,7 @@
     <ClInclude Include="Src\Buffer.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Buffer_old.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\ClientContext.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Codec.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Global.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\HttpCodec.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Src\HttpMessage.h">
@@ -45,9 +33,6 @@
     <ClInclude Include="Src\LockGuard.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Mempool.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Net.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -57,24 +42,18 @@
     <ClInclude Include="Src\Timer.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Src\HttpCodec.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\SoContext.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Addr.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Src\Buffer.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Buffer_old.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\ClientContext.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Codec.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\HttpCodec.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Src\HttpMessage.cpp">
@@ -99,6 +78,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Src\Timer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\HttpCodec.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\SoContext.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
