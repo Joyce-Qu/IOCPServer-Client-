@@ -30,7 +30,7 @@ int main1()
 }
 
 #include "Cow.h"
-int main()
+int main2()
 {
 	Cow cow1;
 	cow1.showCow();
@@ -41,5 +41,16 @@ int main()
 	cow1 = cow2;
 	cow1.showCow();
 	system("pause");
+	return 0;
+}
+
+
+int main()
+{
+	char s[10] = { 0 };
+	//字符串会被截断，很安全
+	//snprintf(s, sizeof(s), "hello world");
+	//将一个无效参数传递给了将无效参数视为严重错误的函数。
+	strncpy_s(s, "hello world", sizeof(s));
 	return 0;
 }
