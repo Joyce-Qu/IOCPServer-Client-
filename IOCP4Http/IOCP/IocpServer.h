@@ -12,8 +12,6 @@ struct ClientContext;
 
 class IocpServer
 {
-	friend class HbTimer;
-
 public:
 	IocpServer(short listenPort, int maxConnectionCount = 10000);
 	IocpServer(const IocpServer&) = delete;
@@ -103,4 +101,3 @@ private:
 };
 
 #endif // !__IOCP_SERVER_H__
-

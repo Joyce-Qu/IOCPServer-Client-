@@ -33,21 +33,18 @@ IocpServer::IocpServer(short listenPort, int maxConnectionCount) :
 	{
 		cout << "CreateEvent failed with error: " << WSAGetLastError() << endl;
 	}
-
 	//自动reset，初始状态为signaled
 	m_hWriteCompletedEvent = CreateEvent(NULL, FALSE, TRUE, NULL);
-	if (WSA_INVALID_EVENT == m_hExitEvent)
+	if (WSA_INVALID_EVENT == m_hWriteCompletedEvent)
 	{
 		cout << "CreateEvent failed with error: " << WSAGetLastError() << endl;
 	}
-
 	InitializeCriticalSection(&m_csClientList);
 }
 
 IocpServer::~IocpServer()
 {
 	stop();
-
 	DeleteCriticalSection(&m_csClientList);
 	Network::unInit();
 }
@@ -81,21 +78,18 @@ bool IocpServer::stop()
 	//关闭工作线程句柄
 	for_each(m_hWorkerThreads.begin(), m_hWorkerThreads.end(),
 		[](const HANDLE& h) { CloseHandle(h); });
-
 	for_each(m_acceptIoCtxList.begin(), m_acceptIoCtxList.end(),
 		[](AcceptIoContext* mAcceptIoCtx) {
-
 			CancelIo((HANDLE)mAcceptIoCtx->m_acceptSocket);
 			closesocket(mAcceptIoCtx->m_acceptSocket);
 			mAcceptIoCtx->m_acceptSocket = INVALID_SOCKET;
-
 			while (!HasOverlappedIoCompleted(&mAcceptIoCtx->m_Overlapped))
+			{
 				Sleep(1);
-
+			}
 			delete mAcceptIoCtx;
 		});
 	m_acceptIoCtxList.clear();
-
 	if (m_hExitEvent)
 	{
 		CloseHandle(m_hExitEvent);
@@ -114,7 +108,6 @@ bool IocpServer::stop()
 		m_pListenCtx = nullptr;
 	}
 	removeAllClients();
-
 	return true;
 }
 
@@ -408,7 +401,6 @@ bool IocpServer::exitIocpWorker()
 				<< WSAGetLastError() << endl;
 		}
 	}
-
 	//这里不明白为什么会返回0，不是应该返回m_nWorkerCnt-1吗？
 	ret = WaitForMultipleObjects(m_nWorkerCnt, m_hWorkerThreads.data(), TRUE, INFINITE);
 	return true;
