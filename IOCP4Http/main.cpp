@@ -1,4 +1,3 @@
-#include "pch.h"
 #include "Iocp/IocpServer.h"
 #include "Http/HttpServer.h"
 #include <iostream>
@@ -15,13 +14,11 @@ int main()
             cout << "start failed" << endl;
             return 0;
         }
-
         while (1)
         {
             Sleep(1000);
         }
     }
-
     system("pause");
     return 0;
 }

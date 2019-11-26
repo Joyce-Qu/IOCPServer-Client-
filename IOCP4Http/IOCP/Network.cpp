@@ -1,5 +1,5 @@
 #include "Network.h"
-#include <mswsock.h>
+#include <MswSock.h>
 #include <iostream>
 using namespace std;
 

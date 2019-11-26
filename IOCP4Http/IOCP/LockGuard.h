@@ -1,6 +1,6 @@
 #ifndef __LOCK_GUARD_H__
 #define __LOCK_GUARD_H__
-#include <windows.h>
+#include <Windows.h>
 
 //CRITICAL_SECTION是可重入的，只要leave和enter的次数一致就行
 //std::mutex是不能重入的，std::recursive_mutex是可重入的

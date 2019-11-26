@@ -1,5 +1,5 @@
-#include <winsock2.h>
-#include <windows.h>
+#include <WinSock2.h>
+#include <Windows.h>
 #include "HttpCodec.h"
 #include "HttpServer.h"
 #include <iostream>
