@@ -1,7 +1,7 @@
 #ifndef __HTTP_MESSAGE_H__
 #define __HTTP_MESSAGE_H__
 #include <unordered_map>
-#include "Slice.h"
+#include "../IOCP/BufferSlice.h"
 
 struct HttpMessage
 {

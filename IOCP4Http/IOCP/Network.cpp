@@ -1,37 +1,37 @@
-#include "pch.h"
-#include "Net.h"
+#include "Network.h"
+#include <mswsock.h>
 #include <iostream>
 using namespace std;
 
-bool Net::init()
+bool Network::init()
 {
     WSADATA wsaData = { 0 };
     return ::WSAStartup(MAKEWORD(2, 2), &wsaData) == 0;
 }
 
-bool Net::unInit()
+bool Network::unInit()
 {
     ::WSACleanup();
     return true;
 }
 
-SOCKET Net::socket()
+SOCKET Network::socket()
 {
     return ::WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, 
 		NULL, 0, WSA_FLAG_OVERLAPPED);
 }
 
-int Net::bind(SOCKET s, const LPSOCKADDR_IN pAddr)
+int Network::bind(SOCKET s, const LPSOCKADDR_IN pAddr)
 {
     return ::bind(s, (LPSOCKADDR)pAddr, sizeof(SOCKADDR_IN));
 }
 
-int Net::listen(SOCKET s, int backlog)
+int Network::listen(SOCKET s, int backlog)
 {
     return ::listen(s, backlog);
 }
 
-SOCKADDR_IN Net::getsockname(SOCKET s)
+SOCKADDR_IN Network::getsockname(SOCKET s)
 {
     SOCKADDR_IN addr[2];
     int addrLen = sizeof(addr);
@@ -44,7 +44,7 @@ SOCKADDR_IN Net::getsockname(SOCKET s)
     return addr[0];
 }
 
-SOCKADDR_IN Net::getpeername(SOCKET s)
+SOCKADDR_IN Network::getpeername(SOCKET s)
 {
     /*
      * 这里用32个字节接收（sizeof(SOCKADDR_IN) + 16）, 
@@ -65,7 +65,7 @@ SOCKADDR_IN Net::getpeername(SOCKET s)
     return addr[0];
 }
 
-bool Net::setKeepAlive(SOCKET s, bool on)
+bool Network::setKeepAlive(SOCKET s, bool on)
 {
     DWORD opt = on;
     int ret = ::setsockopt(s, SOL_SOCKET, SO_KEEPALIVE, (char*)&opt, 
@@ -78,7 +78,7 @@ bool Net::setKeepAlive(SOCKET s, bool on)
     return true;
 }
 
-bool Net::setLinger(SOCKET s, bool on, int timeoutSecs)
+bool Network::setLinger(SOCKET s, bool on, int timeoutSecs)
 {
     LINGER linger;
     linger.l_onoff = on;
@@ -93,7 +93,7 @@ bool Net::setLinger(SOCKET s, bool on, int timeoutSecs)
     return true;
 }
 
-bool Net::updateAcceptContext(SOCKET listenSocket, SOCKET acceptSocket)
+bool Network::updateAcceptContext(SOCKET listenSocket, SOCKET acceptSocket)
 {
     int ret = ::setsockopt(acceptSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT,
 		(char*)&listenSocket, sizeof(SOCKET)); //让accept的socket继承listen的属性

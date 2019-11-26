@@ -1,7 +1,7 @@
 #ifndef __CODEC_H__
 #define __CODEC_H__
-#include "Slice.h"
 #include "HttpMessage.h"
+#include <Windows.h>
 #include <unordered_map>
 #include <string>
 

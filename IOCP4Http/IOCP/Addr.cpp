@@ -1,10 +1,9 @@
-#include "pch.h"
+#include <ws2tcpip.h>
 #include "Addr.h"
 #include <sstream>
 using namespace std;
 
-Addr::Addr(const SOCKADDR_IN& addr)
-    : m_addr(addr)
+Addr::Addr(const SOCKADDR_IN& addr) : m_addr(addr)
 {
 }
 

@@ -1,5 +1,4 @@
-#include "pch.h"
-#include "Slice.h"
+#include "BufferSlice.h"
 
 Slice::Slice() : m_pb("")
 {

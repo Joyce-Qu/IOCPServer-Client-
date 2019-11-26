@@ -1,10 +1,9 @@
 #ifndef __IOCP_SERVER_H__
 #define __IOCP_SERVER_H__
-
+#include "Addr.h"
+#include "PerSocketContext.h"
 #include <list>
 #include <vector>
-#include "Global.h"
-#include "Addr.h"
 
 struct IoContext;
 struct ListenContext;

@@ -1,6 +1,4 @@
-#include "pch.h"
 #include "Buffer.h"
-#include <math.h>
 
 Buffer::Buffer() : m_pBegin(nullptr), m_pEnd(nullptr), m_nSize(0)
 {

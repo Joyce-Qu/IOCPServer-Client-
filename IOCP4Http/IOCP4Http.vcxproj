@@ -19,33 +19,32 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Src\Addr.h" />
-    <ClInclude Include="Src\Buffer.h" />
-    <ClInclude Include="Src\SoContext.h" />
-    <ClInclude Include="Src\Global.h" />
-    <ClInclude Include="Src\HttpCodec.h" />
-    <ClInclude Include="Src\HttpMessage.h" />
-    <ClInclude Include="Src\HttpServer.h" />
-    <ClInclude Include="Src\IoContext.h" />
-    <ClInclude Include="Src\IocpServer.h" />
-    <ClInclude Include="Src\LockGuard.h" />
-    <ClInclude Include="Src\Net.h" />
-    <ClInclude Include="Src\Slice.h" />
-    <ClInclude Include="Src\Timer.h" />
+    <ClCompile Include="HTTP\HttpCodec.cpp" />
+    <ClCompile Include="HTTP\HttpMessage.cpp" />
+    <ClCompile Include="HTTP\HttpServer.cpp" />
+    <ClCompile Include="IOCP\Addr.cpp" />
+    <ClCompile Include="IOCP\Buffer.cpp" />
+    <ClCompile Include="IOCP\BufferSlice.cpp" />
+    <ClCompile Include="IOCP\IocpServer.cpp" />
+    <ClCompile Include="IOCP\Network.cpp" />
+    <ClCompile Include="IOCP\PerIoContext.cpp" />
+    <ClCompile Include="IOCP\PerSocketContext.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="pch.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\Addr.cpp" />
-    <ClCompile Include="Src\Buffer.cpp" />
-    <ClCompile Include="Src\SoContext.cpp" />
-    <ClCompile Include="Src\HttpCodec.cpp" />
-    <ClCompile Include="Src\HttpMessage.cpp" />
-    <ClCompile Include="Src\HttpServer.cpp" />
-    <ClCompile Include="Src\IoContext.cpp" />
-    <ClCompile Include="Src\IocpServer.cpp" />
-    <ClCompile Include="Src\main.cpp" />
-    <ClCompile Include="Src\Net.cpp" />
-    <ClCompile Include="Src\Slice.cpp" />
-    <ClCompile Include="Src\Timer.cpp" />
+    <ClInclude Include="HTTP\HttpCodec.h" />
+    <ClInclude Include="HTTP\HttpMessage.h" />
+    <ClInclude Include="HTTP\HttpServer.h" />
+    <ClInclude Include="IOCP\Addr.h" />
+    <ClInclude Include="IOCP\Buffer.h" />
+    <ClInclude Include="IOCP\BufferSlice.h" />
+    <ClInclude Include="IOCP\IocpServer.h" />
+    <ClInclude Include="IOCP\LockGuard.h" />
+    <ClInclude Include="IOCP\Network.h" />
+    <ClInclude Include="IOCP\PerIoContext.h" />
+    <ClInclude Include="IOCP\PerSocketContext.h" />
+    <ClInclude Include="pch.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

@@ -1,5 +1,6 @@
 #ifndef __ADDR_H__
 #define __ADDR_H__
+#include <WinSock2.h>
 #include <string>
 
 class Addr
@@ -7,7 +8,6 @@ class Addr
 public:
 	Addr() {}
 	Addr(const SOCKADDR_IN& addr);
-
 	std::string toString() const;
 
 private:

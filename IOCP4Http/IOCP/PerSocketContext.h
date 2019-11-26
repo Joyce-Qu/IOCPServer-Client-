@@ -1,8 +1,8 @@
 #ifndef __CLIENT_CONTEXT_H__
 #define __CLIENT_CONTEXT_H__
-#include "Global.h"
-#include "Buffer.h"
 #include "Addr.h"
+#include "Buffer.h"
+#include "PerIoContext.h"
 #include <algorithm>
 #include <string>
 #include <queue>
@@ -30,8 +30,7 @@ struct ClientContext
 	void appendToBuffer(const std::string& inBuf);
 
 	SOCKET m_socket; //客户端socket
-	//SOCKADDR_IN m_addr; //客户端地址
-	Addr m_addr;
+	Addr m_addr; //客户端地址
 	//Avoids Access Violation，该值为0时才能释放ClientContext
 	ULONG m_nPendingIoCnt; 
 	RecvIoContext* m_recvIoCtx;

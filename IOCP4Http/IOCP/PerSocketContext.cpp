@@ -1,12 +1,8 @@
-#include "pch.h"
+#include <ws2tcpip.h>
 #include <assert.h>
-#include "Net.h"
-#include "Buffer.h"
-#include "LockGuard.h"
-#include "IoContext.h"
-#include "SoContext.h"
-#include "HttpCodec.h"
-
+#include "Network.h"
+#include "PerIoContext.h"
+#include "PerSocketContext.h"
 #include <iostream>
 using namespace std;
 
@@ -18,13 +14,13 @@ ListenContext::ListenContext(short port, const std::string& ip)
     //m_addr.sin_addr.s_addr = inet_addr(ip.c_str());
     m_addr.sin_port = htons(port);
 
-    m_socket = Net::socket();
+    m_socket = Network::socket();
     assert(SOCKET_ERROR != m_socket);
 }
 
 ClientContext::ClientContext(const SOCKET& socket) :
     m_socket(socket), m_recvIoCtx(new RecvIoContext())
-    , m_sendIoCtx(new IoContext(PostType::SEND_EVENT))
+    , m_sendIoCtx(new IoContext(PostType::SEND))
     , m_nPendingIoCnt(0)
 {
     SecureZeroMemory(&m_addr, sizeof(SOCKADDR_IN));

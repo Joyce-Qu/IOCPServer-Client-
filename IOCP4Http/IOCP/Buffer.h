@@ -1,6 +1,7 @@
 #ifndef __BUFFER_H__
 #define __BUFFER_H__
-#include "Slice.h"
+#include <windows.h>
+#include "BufferSlice.h"
 #include <string>
 
 class Buffer

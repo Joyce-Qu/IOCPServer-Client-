@@ -1,7 +1,6 @@
-#include "pch.h"
-#include "Slice.h"
+#include <winsock2.h>
+#include <windows.h>
 #include "HttpCodec.h"
-#include "SoContext.h"
 #include "HttpServer.h"
 #include <iostream>
 using namespace std;

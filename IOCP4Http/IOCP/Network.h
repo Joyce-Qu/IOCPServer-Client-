@@ -1,7 +1,8 @@
 #ifndef __NET_H__
 #define __NET_H__
+#include <WinSock2.h>
 
-struct Net
+struct Network
 {
     static bool init();
     static bool unInit();
