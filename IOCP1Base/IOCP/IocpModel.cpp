@@ -75,8 +75,8 @@ DWORD WINAPI CIocpModel::_WorkerThread(LPVOID lpParam)
 		{
 			// ÅĞ¶ÏÊÇ·ñÓĞ¿Í»§¶Ë¶Ï¿ªÁË
 			if ((0 == dwBytesTransfered)
-				&& (OPERATION_TYPE::RECV == pIoContext->m_OpType
-					|| OPERATION_TYPE::SEND == pIoContext->m_OpType))
+				&& (PostType::RECV == pIoContext->m_PostType
+					|| PostType::SEND == pIoContext->m_PostType))
 			{
 				pIocpModel->OnConnectionClosed(pSoContext);
 				//pIocpModel->_ShowMessage("¿Í»§¶Ë %s:%d ¶Ï¿ªÁ¬½Ó",
@@ -88,9 +88,9 @@ DWORD WINAPI CIocpModel::_WorkerThread(LPVOID lpParam)
 			}
 			else
 			{
-				switch (pIoContext->m_OpType)
+				switch (pIoContext->m_PostType)
 				{
-				case OPERATION_TYPE::ACCEPT:
+				case PostType::ACCEPT:
 				{
 					// ÎªÁËÔö¼Ó´úÂë¿É¶ÁĞÔ£¬ÕâÀïÓÃ×¨ÃÅµÄ_DoAcceptº¯Êı½øĞĞ´¦ÀíÁ¬ÈëÇëÇó
 					pIoContext->m_nTotalBytes = dwBytesTransfered;
@@ -98,7 +98,7 @@ DWORD WINAPI CIocpModel::_WorkerThread(LPVOID lpParam)
 				}
 				break;
 
-				case OPERATION_TYPE::RECV:
+				case PostType::RECV:
 				{
 					// ÎªÁËÔö¼Ó´úÂë¿É¶ÁĞÔ£¬ÕâÀïÓÃ×¨ÃÅµÄ_DoRecvº¯Êı½øĞĞ´¦Àí½ÓÊÕÇëÇó
 					pIoContext->m_nTotalBytes = dwBytesTransfered;
@@ -107,7 +107,7 @@ DWORD WINAPI CIocpModel::_WorkerThread(LPVOID lpParam)
 				break;
 
 				// ÕâÀïÂÔ¹ı²»Ğ´ÁË£¬Òª²»´úÂëÌ«¶àÁË£¬²»ÈİÒ×Àí½â£¬Send²Ù×÷Ïà¶ÔÀ´½²¼òµ¥Ò»Ğ©
-				case OPERATION_TYPE::SEND:
+				case PostType::SEND:
 				{
 					pIoContext->m_nSentBytes += dwBytesTransfered;
 					pIocpModel->_DoSend(pSoContext, pIoContext);
@@ -219,8 +219,8 @@ bool CIocpModel::SendData(SocketContext* pSoContext, char* data, int size)
 	}
 	//Í¶µİWSASendÇëÇó£¬·¢ËÍÊı¾İ
 	IoContext* pNewIoContext = pSoContext->GetNewIoContext();
-	pNewIoContext->m_sockAccept = pSoContext->m_Socket;
-	pNewIoContext->m_OpType = OPERATION_TYPE::SEND;
+	pNewIoContext->m_acceptSocket = pSoContext->m_Socket;
+	pNewIoContext->m_PostType = PostType::SEND;
 	pNewIoContext->m_nTotalBytes = size;
 	pNewIoContext->m_wsaBuf.len = size;
 	memcpy(pNewIoContext->m_wsaBuf.buf, data, size);
@@ -425,12 +425,12 @@ bool CIocpModel::_PostAccept(IoContext* pIoContext)
 	}
 	// ×¼±¸²ÎÊı
 	pIoContext->ResetBuffer();
-	pIoContext->m_OpType = OPERATION_TYPE::ACCEPT;
+	pIoContext->m_PostType = PostType::ACCEPT;
 	// SOCKET hClient = accept(hSocket, NULL, NULL); //´«Í³accept
 	// ÎªÒÔºóĞÂÁ¬ÈëµÄ¿Í»§¶ËÏÈ×¼±¸ºÃSocket( Õâ¸öÊÇÓë´«Í³accept×î´óµÄÇø±ğ ) 
-	pIoContext->m_sockAccept = WSASocket(AF_INET, SOCK_STREAM,
+	pIoContext->m_acceptSocket = WSASocket(AF_INET, SOCK_STREAM,
 		IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
-	if (INVALID_SOCKET == pIoContext->m_sockAccept)
+	if (INVALID_SOCKET == pIoContext->m_acceptSocket)
 	{// Í¶µİ¶àÉÙ´ÎACCEPT£¬¾Í´´½¨¶àÉÙ¸ösocket£»
 		_ShowMessage("´´½¨ÓÃÓÚAcceptµÄSocketÊ§°Ü£¡err=%d", WSAGetLastError());
 		return false;
@@ -440,7 +440,7 @@ bool CIocpModel::_PostAccept(IoContext* pIoContext)
 	DWORD dwBytes = 0, dwAddrLen = (sizeof(SOCKADDR_IN) + 16);
 	WSABUF* pWSAbuf = &pIoContext->m_wsaBuf; //±ØĞë+16,²Î¼ûMSDN
 	if (!m_lpfnAcceptEx(m_pListenContext->m_Socket,
-		pIoContext->m_sockAccept, pWSAbuf->buf,
+		pIoContext->m_acceptSocket, pWSAbuf->buf,
 		0, //pWSAbuf->len - (dwAddrLen * 2),
 		dwAddrLen, dwAddrLen, &dwBytes,
 		&pIoContext->m_Overlapped))
@@ -488,7 +488,7 @@ bool CIocpModel::_DoAccept(SocketContext* pSoContext, IoContext* pIoContext)
 	SocketContext* pNewSocketContext = new SocketContext;
 	//¼ÓÈëµ½ContextListÖĞÈ¥(ĞèÒªÍ³Ò»¹ÜÀí£¬·½±ãÊÍ·Å×ÊÔ´)
 	this->_AddToContextList(pNewSocketContext);
-	pNewSocketContext->m_Socket = pIoContext->m_sockAccept;
+	pNewSocketContext->m_Socket = pIoContext->m_acceptSocket;
 	memcpy(&(pNewSocketContext->m_ClientAddr), 
 		clientAddr, sizeof(SOCKADDR_IN));
 
@@ -525,8 +525,8 @@ bool CIocpModel::_DoAccept(SocketContext* pSoContext, IoContext* pIoContext)
 	IoContext* pNewIoContext = pNewSocketContext->GetNewIoContext();
 	if (pNewIoContext != NULL)
 	{//²»³É¹¦£¬»áÔõÃ´Ñù£¿
-		pNewIoContext->m_OpType = OPERATION_TYPE::RECV;
-		pNewIoContext->m_sockAccept = pNewSocketContext->m_Socket;
+		pNewIoContext->m_PostType = PostType::RECV;
+		pNewIoContext->m_acceptSocket = pNewSocketContext->m_Socket;
 		// Í¶µİrecvÇëÇó
 		return _PostRecv(pNewSocketContext, pNewIoContext);
 	}
@@ -582,7 +582,7 @@ bool CIocpModel::_DoFirstRecvWithData(IoContext* pIoContext)
 	this->_ShowMessage("pNewSocketContext=%p", pNewSocketContext);
 	//¼ÓÈëµ½ContextListÖĞÈ¥(ĞèÒªÍ³Ò»¹ÜÀí£¬·½±ãÊÍ·Å×ÊÔ´)
 	this->_AddToContextList(pNewSocketContext);
-	pNewSocketContext->m_Socket = pIoContext->m_sockAccept;
+	pNewSocketContext->m_Socket = pIoContext->m_acceptSocket;
 	memcpy(&(pNewSocketContext->m_ClientAddr), clientAddr, remoteLen);
 	// 3. ½«¸ÃÌ×½Ó×Ö°ó¶¨µ½Íê³É¶Ë¿Ú
 	// ²ÎÊıÉèÖÃÍê±Ï£¬½«Õâ¸öSocketºÍÍê³É¶Ë¿Ú°ó¶¨(ÕâÒ²ÊÇÒ»¸ö¹Ø¼ü²½Öè)
@@ -596,8 +596,8 @@ bool CIocpModel::_DoFirstRecvWithData(IoContext* pIoContext)
 	this->OnConnectionAccepted(pNewSocketContext);
 	// Ò»¶¨ÒªĞÂ½¨Ò»¸öIoContext£¬ÒòÎªÔ­ÓĞµÄÊÇListenSocketµÄ
 	IoContext* pNewIoContext = pNewSocketContext->GetNewIoContext();
-	pNewIoContext->m_OpType = OPERATION_TYPE::RECV;
-	pNewIoContext->m_sockAccept = pNewSocketContext->m_Socket;
+	pNewIoContext->m_PostType = PostType::RECV;
+	pNewIoContext->m_acceptSocket = pNewSocketContext->m_Socket;
 	pNewIoContext->m_nTotalBytes = pIoContext->m_nTotalBytes;
 	pNewIoContext->m_wsaBuf.len = pIoContext->m_nTotalBytes;
 	memcpy(pNewIoContext->m_wsaBuf.buf, pIoContext->m_wsaBuf.buf,
@@ -620,7 +620,7 @@ bool CIocpModel::_DoFirstRecvWithoutData(IoContext* pIoContext)
 	// 1. Ê×ÏÈÈ¡µÃÁ¬Èë¿Í»§¶ËµÄµØÖ·ĞÅÏ¢
 	SOCKADDR_IN clientAddr = { 0 };
 	int addrLen = sizeof(clientAddr);
-	getpeername(pIoContext->m_sockAccept, (SOCKADDR*)&clientAddr, &addrLen);
+	getpeername(pIoContext->m_acceptSocket, (SOCKADDR*)&clientAddr, &addrLen);
 	this->_ShowMessage("¿Í»§¶Ë %s:%d Á¬ÈëÁË", inet_ntoa(clientAddr.sin_addr),
 		ntohs(clientAddr.sin_port));
 	// 2. ÕâÀïĞèÒª×¢Òâ£¬ÕâÀï´«ÈëµÄÕâ¸öÊÇListenSocketÉÏµÄContext£¬
@@ -628,7 +628,7 @@ bool CIocpModel::_DoFirstRecvWithoutData(IoContext* pIoContext)
 	this->_ShowMessage("pNewSocketContext=%p", pNewSocketContext);
 	//¼ÓÈëµ½ContextListÖĞÈ¥(ĞèÒªÍ³Ò»¹ÜÀí£¬·½±ãÊÍ·Å×ÊÔ´)
 	this->_AddToContextList(pNewSocketContext);
-	pNewSocketContext->m_Socket = pIoContext->m_sockAccept;
+	pNewSocketContext->m_Socket = pIoContext->m_acceptSocket;
 	memcpy(&(pNewSocketContext->m_ClientAddr),
 		&clientAddr, sizeof(clientAddr));
 	// 3. ½«¸ÃÌ×½Ó×Ö°ó¶¨µ½Íê³É¶Ë¿Ú
@@ -660,13 +660,13 @@ IoContext* pIoContext:	ÓÃÓÚ½øĞĞIOµÄÌ×½Ó×ÖÉÏµÄ½á¹¹£¬Ö÷ÒªÎªWSARecv²ÎÊıºÍWSASend²ÎÊ
 bool CIocpModel::_PostRecv(SocketContext* pSoContext, IoContext* pIoContext)
 {
 	pIoContext->ResetBuffer();
-	pIoContext->m_OpType = OPERATION_TYPE::RECV;
+	pIoContext->m_PostType = PostType::RECV;
 	pIoContext->m_nTotalBytes = 0;
 	pIoContext->m_nSentBytes = 0;
 	// ³õÊ¼»¯±äÁ¿
 	DWORD dwFlags = 0, dwBytes = 0;
 	// ³õÊ¼»¯Íê³Éºó£¬Í¶µİWSARecvÇëÇó
-	const int nBytesRecv = WSARecv(pIoContext->m_sockAccept,
+	const int nBytesRecv = WSARecv(pIoContext->m_acceptSocket,
 		&pIoContext->m_wsaBuf, 1, &dwBytes, &dwFlags,
 		&pIoContext->m_Overlapped, NULL);
 	// Èç¹û·µ»ØÖµ´íÎó£¬²¢ÇÒ´íÎóµÄ´úÂë²¢·ÇÊÇPendingµÄ»°£¬ÄÇ¾ÍËµÃ÷Õâ¸öÖØµşÇëÇóÊ§°ÜÁË
@@ -708,13 +708,13 @@ bool CIocpModel::_PostSend(SocketContext* pSoContext, IoContext* pIoContext)
 {
 	// ³õÊ¼»¯±äÁ¿
 	////pIoContext->ResetBuffer(); //Íâ²¿ÉèÖÃm_wsaBuf
-	pIoContext->m_OpType = OPERATION_TYPE::SEND;
+	pIoContext->m_PostType = PostType::SEND;
 	pIoContext->m_nTotalBytes = 0;
 	pIoContext->m_nSentBytes = 0;
 	//Í¶µİWSASendÇëÇó -- ĞèÒªĞŞ¸Ä
 	const DWORD dwFlags = 0;
 	DWORD dwSendNumBytes = 0;
-	const int nRet = WSASend(pIoContext->m_sockAccept,
+	const int nRet = WSASend(pIoContext->m_acceptSocket,
 		&pIoContext->m_wsaBuf, 1, &dwSendNumBytes, dwFlags,
 		&pIoContext->m_Overlapped, NULL);
 	// Èç¹û·µ»ØÖµ´íÎó£¬²¢ÇÒ´íÎóµÄ´úÂë²¢·ÇÊÇPendingµÄ»°£¬ÄÇ¾ÍËµÃ÷Õâ¸öÖØµşÇëÇóÊ§°ÜÁË
