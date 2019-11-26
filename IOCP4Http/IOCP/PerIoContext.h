@@ -15,7 +15,6 @@ enum PostType
 	ACCEPT, // 标志投递的Accept操作
 	SEND, // 标志投递的是发送操作
 	RECV, // 标志投递的是接收操作
-	CLOSE,
 };
 
 enum PostResult

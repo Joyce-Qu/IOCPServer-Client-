@@ -243,9 +243,6 @@ unsigned WINAPI IocpServer::IocpWorkerThread(LPVOID arg)
 		case PostType::SEND:
 			pThis->handleSend(lpCompletionKey, lpOverlapped, dwBytesTransferred);
 			break;
-		case PostType::CLOSE:
-			pThis->handleClose(lpCompletionKey);
-			break;
 		default:
 			break;
 		}
@@ -278,7 +275,8 @@ bool IocpServer::getAcceptExPtr()
 	DWORD dwBytes;
 	GUID GuidAcceptEx = WSAID_ACCEPTEX;
 	LPFN_ACCEPTEX lpfnAcceptEx = NULL;
-	int ret = WSAIoctl(m_pListenCtx->m_socket, SIO_GET_EXTENSION_FUNCTION_POINTER,
+	int ret = WSAIoctl(m_pListenCtx->m_socket,
+		SIO_GET_EXTENSION_FUNCTION_POINTER,
 		&GuidAcceptEx, sizeof(GuidAcceptEx),
 		&lpfnAcceptEx, sizeof(lpfnAcceptEx),
 		&dwBytes, NULL, NULL);
@@ -297,7 +295,8 @@ bool IocpServer::getAcceptExSockaddrs()
 	DWORD dwBytes;
 	GUID GuidAddrs = WSAID_GETACCEPTEXSOCKADDRS;
 	LPFN_GETACCEPTEXSOCKADDRS lpfnGetAcceptExAddr = NULL;
-	int ret = WSAIoctl(m_pListenCtx->m_socket, SIO_GET_EXTENSION_FUNCTION_POINTER,
+	int ret = WSAIoctl(m_pListenCtx->m_socket, 
+		SIO_GET_EXTENSION_FUNCTION_POINTER,
 		&GuidAddrs, sizeof(GuidAddrs),
 		&lpfnGetAcceptExAddr, sizeof(lpfnGetAcceptExAddr),
 		&dwBytes, NULL, NULL);
@@ -341,7 +340,6 @@ bool IocpServer::setKeepAlive(ClientContext* pConnClient,
 bool IocpServer::createListenClient(short listenPort)
 {
 	m_pListenCtx = new ListenContext(listenPort);
-
 	//创建完成端口
 	m_hComPort = associateWithCompletionPort(INVALID_SOCKET, NULL);
 	if (NULL == m_hComPort)
@@ -353,27 +351,26 @@ bool IocpServer::createListenClient(short listenPort)
 	{
 		return false;
 	}
-
 	if (SOCKET_ERROR == Network::bind(m_pListenCtx->m_socket, &m_pListenCtx->m_addr))
 	{
 		cout << "bind failed" << endl;
 		return false;
 	}
-
 	if (SOCKET_ERROR == Network::listen(m_pListenCtx->m_socket))
 	{
 		cout << "listen failed" << endl;
 		return false;
 	}
-
 	//获取acceptEx函数指针
 	if (!getAcceptExPtr())
+	{
 		return false;
-
+	}
 	//获取GetAcceptExSockaddrs函数指针
 	if (!getAcceptExSockaddrs())
+	{
 		return false;
-
+	}
 	return true;
 }
 
@@ -414,7 +411,6 @@ bool IocpServer::exitIocpWorker()
 
 	//这里不明白为什么会返回0，不是应该返回m_nWorkerCnt-1吗？
 	ret = WaitForMultipleObjects(m_nWorkerCnt, m_hWorkerThreads.data(), TRUE, INFINITE);
-
 	return true;
 }
 
