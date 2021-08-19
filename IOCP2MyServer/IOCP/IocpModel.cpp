@@ -846,7 +846,7 @@ string CIocpModel::GetLocalIP()
 	// 将IP地址转化成字符串形式
 	struct in_addr inAddr;
 	memmove(&inAddr, lpAddr, 4);
-	m_strIP = string(inet_ntoa(inAddr));
+	m_strIP = string("127.0.0.1");
 	return m_strIP;
 }
 

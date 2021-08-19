@@ -15,8 +15,8 @@ using std::string;
 #define MAX_BUFFER_LEN 512//(4*1024)//(8*1024)
 #define DEFAULT_PORT 10240 // 默认端口
 #define DEFAULT_IP _T("127.0.0.1") // 默认IP地址
-#define DEFAULT_THREADS 10000 // 默认并发线程数
-#define DEFAULT_TIMES 10000 // 默认发送次数
+#define DEFAULT_THREADS 1 // 默认并发线程数
+#define DEFAULT_TIMES 2 // 默认发送次数
 #define DEFAULT_MESSAGE _T("Hello!") // 默认的发送信息
 typedef void (*LOG_FUNC)(const string& strInfo);
 
@@ -39,6 +39,10 @@ struct ConnectionThreadParam
 	CClient* pClient; // 类指针，用于调用类中的函数
 };
 
+struct IOCPThreadParam{
+	CClient* pClient; // 类指针，用于调用类中的函数
+	HANDLE ioSocket;
+};
 class CClient
 {
 public:
@@ -73,13 +77,14 @@ private:
 	// 建立连接
 	bool EstablishConnections();
 	// 向服务器进行连接
-	bool ConnectToServer(SOCKET& pSocket, CString strServer, int nPort);
+	int ConnectToServer(SOCKET& pSocket, CString strServer, int nPort);
 	// 用于建立连接的线程
 	static DWORD WINAPI _ConnectionThread(LPVOID lpParam);
 	// 用于发送信息的线程
 	static DWORD WINAPI _WorkerThread(LPVOID lpParam);
 	// 释放资源
 	void CleanUp();
+	static DWORD WINAPI _StartIOCP(LPVOID lpParam);
 
 private:
 	//LOG_FUNC m_LogFunc;
@@ -94,6 +99,9 @@ private:
 	//DWORD* m_pWorkerThreadIds; //所有工作线程的ID
 	WorkerThreadParam* m_pWorkerParams; // 线程参数
 	HANDLE m_hConnectionThread; // 接受连接的线程句柄
+	HANDLE m_hIOCPThread;
+	HANDLE m_hIOCompletionPort;
+	HANDLE m_hConnectedEvent;
 	HANDLE m_hShutdownEvent; // 通知线程，为了更好的退出线程
 	LONG m_nRunningWorkerThreads; // 正在运行的并发线程数量
 	//使用线程池，进行操作

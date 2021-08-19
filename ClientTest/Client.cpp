@@ -19,7 +19,8 @@ CClient::CClient(void) :
 	//m_phWorkerThreads(NULL),
 	//m_pWorkerThreadIds(NULL),
 	m_hConnectionThread(NULL),
-	m_hShutdownEvent(NULL)
+	m_hShutdownEvent(NULL),
+	m_hIOCompletionPort(0)	
 {
 	//m_LogFunc = NULL;
 }
@@ -39,6 +40,49 @@ DWORD WINAPI CClient::_ConnectionThread(LPVOID lpParam)
 	pClient->EstablishConnections();
 	pClient->ShowMessage("_ConnectionThread线程结束.\n");
 	RELEASE_POINTER(pParams);
+	return 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// 创建IOCP，等待监听事件
+// 
+
+#include "..\IOCP3Server\IOCP\PerSocketContext.h"
+DWORD WINAPI CClient::_StartIOCP(LPVOID lpParam){
+	IOCPThreadParam* pParams = (IOCPThreadParam*)lpParam;
+	CClient* pClient = (CClient*)pParams->pClient;
+	//while(WAIT_OBJECT_0 != WaitForSingleObject(m_hShutdownEvent, 0)){
+	while(true){
+		DWORD dwBytesTransfered = 0;
+		OVERLAPPED* pOverlapped = nullptr;
+		SocketContext* pSoContext = nullptr;
+		const BOOL bRet = GetQueuedCompletionStatus(pParams->ioSocket,
+													&dwBytesTransfered, (PULONG_PTR)&pSoContext, &pOverlapped, INFINITE);
+		IoContext* pIoContext = CONTAINING_RECORD(pOverlapped, IoContext, m_Overlapped);
+		if(nullptr == pSoContext)		{
+			break;
+		}
+		if(!bRet) {	//返回值为false，表示出错
+			const DWORD dwErr = GetLastError();
+			// 显示一下提示信息
+			continue;
+		} else{
+			if((0 == dwBytesTransfered)
+			   && (OPERATION_TYPE::RECV == pIoContext->m_OpType
+				   || OPERATION_TYPE::SEND == pIoContext->m_OpType))			{
+				// Close
+				//pIocpModel->_ShowMessage("客户端 %s:%d 断开连接",
+				//	inet_ntoa(pSoContext->m_ClientAddr.sin_addr),
+				//	ntohs(pSoContext->m_ClientAddr.sin_port));
+				// 释放掉对应的资源
+				//pIocpModel->_DoClose(pSoContext);
+				continue;
+			} else if(pIoContext->m_OpType == OPERATION_TYPE::CONNECT){
+				BOOL bRet = SetEvent(pClient->m_hConnectedEvent);
+				pClient->ShowMessage("Detect connect IO event...!!!!\n");
+			}
+		}
+	}
 	return 0;
 }
 
@@ -152,12 +196,22 @@ bool CClient::EstablishConnections()
 			return true;
 		}
 		// 向服务器进行连接
-		if (!this->ConnectToServer(m_pWorkerParams[i].sock,
-			m_strServerIP, m_nPort))
+		int ret = this->ConnectToServer(m_pWorkerParams[i].sock,
+										m_strServerIP, m_nPort);
+		if (ret == -1)
 		{
 			ShowMessage(_T("连接服务器失败！"));
 			//CleanUp(); //这里清除后，线程还在用，就崩溃了
 			continue;//return false;
+		} else if (ret == 1){
+			//WAIT_OBJECT_0 == WaitForSingleObject(m_hShutdownEvent, 0)
+			if (WAIT_OBJECT_0 == WaitForSingleObject(m_hConnectedEvent, INFINITE)){
+				ShowMessage(_T("连接服务器事件已经收到！"));
+				continue;
+			} else{
+				ShowMessage(_T("连接服务器事件失败！"));
+				break;
+			}
 		}
 		m_pWorkerParams[i].nThreadNo = i + 1;
 		m_pWorkerParams[i].nSendTimes = m_nTimes;
@@ -182,18 +236,28 @@ bool CClient::EstablishConnections()
 
 ////////////////////////////////////////////////////////////////////////////////////
 //	向服务器进行Socket连接
-bool CClient::ConnectToServer(SOCKET& pSocket, CString strServer, int nPort)
+int CClient::ConnectToServer(SOCKET& pSocket, CString strServer, int nPort)
 {
 	struct sockaddr_in ServerAddress;
 	struct hostent* Server;
 	// 生成SOCKET
-	pSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	//pSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	pSocket = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, WSA_FLAG_OVERLAPPED);
+	SocketContext* pNewSocketContext = new SocketContext;
+	pNewSocketContext->m_Socket = pSocket;
+	HANDLE hTemp = CreateIoCompletionPort((HANDLE)pSocket,
+										  m_hIOCompletionPort, (DWORD)pNewSocketContext, 0);
+	if(nullptr == hTemp) // ERROR_INVALID_PARAMETER=87L
+	{
+		ShowMessage("Bind IOCP failed, err=%d", GetLastError());
+		return -1;
+	}
 	if (INVALID_SOCKET == pSocket)
 	{
 		ShowMessage("初始化Socket失败，err=%d\n",
 			WSAGetLastError());
 		pSocket = NULL;
-		return false;
+		return -1;
 	}
 	// 生成地址信息
 	Server = gethostbyname(strServer.GetString());
@@ -202,25 +266,78 @@ bool CClient::ConnectToServer(SOCKET& pSocket, CString strServer, int nPort)
 		ShowMessage("无效的服务器地址.\n");
 		closesocket(pSocket);
 		pSocket = NULL;
-		return false;
+		return -1;
 	}
 	ZeroMemory((char*)&ServerAddress, sizeof(ServerAddress));
 	ServerAddress.sin_family = AF_INET;
 	CopyMemory((char*)&ServerAddress.sin_addr.s_addr,
 		(char*)Server->h_addr, Server->h_length);
+	ServerAddress.sin_addr.s_addr = inet_addr("127.0.0.1");
+
 	ServerAddress.sin_port = htons(m_nPort);
-	// 开始连接服务器
-	if (SOCKET_ERROR == connect(pSocket,
-		reinterpret_cast<const struct sockaddr*>(&ServerAddress),
-		sizeof(ServerAddress)))
-	{
+	// 开始连接服务
+	LPFN_CONNECTEX fn_ConnectEx = nullptr;
+	GUID guid = WSAID_CONNECTEX;
+	DWORD dwBytes = 0;
+	int res = WSAIoctl(pSocket, SIO_GET_EXTENSION_FUNCTION_POINTER,
+					   &guid, sizeof(guid),
+					   &fn_ConnectEx, sizeof(fn_ConnectEx),
+					   &dwBytes, NULL, NULL);
+	if(!fn_ConnectEx){
 		ShowMessage("连接至服务器失败！err=%d\n",
-			WSAGetLastError());
+					WSAGetLastError());
 		closesocket(pSocket);
 		pSocket = NULL;
-		return false;
+		return -1;
+	} else{
+		struct sockaddr_in addr;
+		ZeroMemory(&addr, sizeof(addr));
+		addr.sin_family = AF_INET;
+		addr.sin_addr.s_addr = INADDR_ANY;
+		addr.sin_port = 0;
+		res = bind(pSocket, (SOCKADDR*)&addr, sizeof(addr));
+		if(res != 0){
+			printf("bind failed: %d\n", WSAGetLastError());
+			return 1;
+		}
+
+		// life cycle
+		IoContext* pIoContext = new IoContext;
+		pIoContext->m_OpType = OPERATION_TYPE::CONNECT;
+
+		if(fn_ConnectEx(pSocket, reinterpret_cast<const struct sockaddr*>(&ServerAddress),
+						sizeof(ServerAddress), nullptr, 0, nullptr, &pIoContext->m_Overlapped))	{
+			ShowMessage("连接至服务器成功");
+			return 0;
+		} else{
+			int error = WSAGetLastError();
+			if(error == WSA_IO_PENDING)	{
+				ShowMessage("连接至服务器进入队列");
+				return 1;
+			} else	{
+				ShowMessage("连接至服务器失败,err:%d", errno);
+				// MessageId: WSAEINVAL
+				//
+				// MessageText:
+				//
+				// An invalid argument was supplied.
+				//
+				//#define WSAEINVAL                        10022L
+				return -1;
+			}
+		}
+
+		/*int nRet = connect(pSocket, reinterpret_cast<const struct sockaddr*>(&ServerAddress),
+						   sizeof(ServerAddress));
+		if(nRet==SOCKET_ERROR)	{
+			ShowMessage("连接至服务器失败！err=%d\n",
+						WSAGetLastError());
+			closesocket(pSocket);
+			pSocket = NULL;
+			return false;
+		}*/
 	}
-	return true;
+	return 0;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -243,11 +360,23 @@ bool CClient::Start()
 {
 	// 建立系统退出的事件通知 bManualReset bInitialState
 	m_hShutdownEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	m_hConnectedEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	m_nRunningWorkerThreads = 0;
 	// 启动连接线程
 	DWORD nThreadID = 0;
+	m_hIOCompletionPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE,
+												 nullptr, 0, 0); 
 	ConnectionThreadParam* pThreadParams = new ConnectionThreadParam;
 	pThreadParams->pClient = this;
+	DWORD nIOCPThreadID = 0;
+	
+	IOCPThreadParam* pIOThreadParams = new IOCPThreadParam;
+	pIOThreadParams->pClient = this;
+	pIOThreadParams->ioSocket = m_hIOCompletionPort;
+	m_hIOCPThread = ::CreateThread(0, 0, _StartIOCP,(void*)pIOThreadParams, 0, &nIOCPThreadID);
+	if(nullptr == m_hIOCompletionPort){
+		return false;
+	}
 	m_hConnectionThread = ::CreateThread(0, 0, _ConnectionThread,
 		(void*)pThreadParams, 0, &nThreadID);
 	return true;
@@ -316,7 +445,7 @@ CString CClient::GetLocalIP()
 	struct in_addr inAddr;
 	memmove(&inAddr, lpAddr, 4);
 	// 转化成标准的IP地址形式
-	m_strLocalIP = CString(inet_ntoa(inAddr));
+	m_strLocalIP = CString("192.168.50.85");
 	return m_strLocalIP;
 }
 
